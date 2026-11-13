@@ -298,7 +298,7 @@ let state = loadState();
     };
 
     function getSpecificFishSprite(name) {
-      return FISHGIVING_NAMES.has(name)?`assets/fishgiving/sprites.svg#${slugify(name)}`:`assets/fish/${slugify(name)}.png`;
+      return FISHGIVING_NAMES.has(name)?`assets/fishgiving/sprites.svg?v=2#${slugify(name)}`:`assets/fish/${slugify(name)}.png`;
     }
 
     function getFishSprite(name, rarity, item = false, condition = "") {
@@ -623,7 +623,7 @@ let state = loadState();
         const caught=count>0;
         const secret=["Unknown","Extinct"].includes(rarity);
         const displayName=!caught&&secret?"???":name;
-        const desc=!caught&&secret?"Its identity remains hidden until you catch it.":`${fishMeta(f).limited?"🍁 LIMITED · ":""}${fishDescriptions[name]||"No description recorded."}`;
+        const desc=!caught&&secret?"Its identity remains hidden until you catch it.":(fishDescriptions[name]||"No description recorded.");
         const thumb = getFishSprite(name, rarity, item, condition);
         let conditionText="";
         if(condition==="day")conditionText="Day only"; if(condition==="night")conditionText="Night only"; if(condition==="dayOptional")conditionText="Day only · Optional"; if(condition==="lunar")conditionText="10% Mosslurker replacement"; if(condition==="optional")conditionText="Optional"; if(condition==="whale")conditionText="Whale Migration"; if(condition==="moby")conditionText="10% Blue Whale replacement"; if(condition==="migration")conditionText="Shark Migration"; if(condition==="migrationRequired")conditionText="Shark Migration · Required"; if(condition==="coral")conditionText="Hides in Coral"; if(condition==="reefTitan")conditionText="10% Reef Titan replacement"; if(condition==="required")conditionText="Required"; if(condition==="elderKelpie")conditionText="10% Kelpie replacement";
@@ -638,7 +638,7 @@ let state = loadState();
         if(meta.dateOnly)parts.push("November 26 only");
         if(condition==="turkeyReplacement")parts.push("10% Turkey replacement");
         if(parts.length) conditionText=parts.join(" · ");
-        return `<article class="bestiary-list-card ${caught?"caught":"uncaught"}"><div class="bestiary-thumb ${(!caught&&secret)?'locked':''}"><img src="${thumb}" alt="${displayName}"></div><div class="bestiary-copy"><div class="bestiary-card-top"><div><strong>${displayName}</strong></div><span class="badge ${rarity}">${rarity}</span></div><p>${desc}</p><div class="bestiary-meta"><span>${caught?`Caught: ${count}`:"Undiscovered"}</span><span>${caught||!secret?`Value: ${price}g`:"Value ???"}</span>${conditionText?`<span>${conditionText}</span>`:""}${item?`<span>Item Catch</span>`:""}</div></div></article>`;
+        return `<article class="bestiary-list-card ${caught?"caught":"uncaught"}"><div class="bestiary-thumb ${item?"item-thumb":""} ${(!caught&&secret)?'locked':''}"><img src="${thumb}" alt="${displayName}"></div><div class="bestiary-copy"><div class="bestiary-card-top"><div><strong>${displayName}</strong></div><span class="badge ${rarity}">${rarity}</span></div><p>${desc}</p><div class="bestiary-meta"><span>${caught?`Caught: ${count}`:"Undiscovered"}</span><span>${caught||!secret?`Value: ${price}g`:"Value ???"}</span>${conditionText?`<span>${conditionText}</span>`:""}${item?`<span>Item Catch</span>`:""}</div></div></article>`;
       }).join("");
 
       el.innerHTML = `<div class="bestiary-shell"><aside class="bestiary-sidebar"><div class="bestiary-side-title">BESTIARY</div><div class="bestiary-side-sub">Discover • Catch • Learn</div>${filterButton("all","All Fish",`<small>${allUnique.filter(f=>isCaught(f[0])).length} / ${allUnique.length}</small>`)}${discoveredSecrets.length?filterButton("secrets","Secrets",`<small>${discoveredSecrets.length} discovered</small>`):""}<div class="bestiary-group-title">Locations</div>${locationButtons}<div class="bestiary-group-title">Events</div>${eventButtons}<div class="bestiary-group-title">Weather</div>${weatherButtons}</aside><section class="bestiary-main"><div class="bestiary-header"><div class="bestiary-title"><div class="pixel-kicker">FISH BESTIARY</div><h3>${title}</h3><p>${subtitle}</p></div><div class="completion-box"><span class="mini-label">Completion</span><div class="progress-shell"><div class="progress-bar" style="width:${progress.pct}%"></div></div><div class="completion-big"><span>${progress.caught} / ${progress.total} Caught</span><strong>${progress.pct.toFixed(0)}%</strong></div></div></div><div class="bestiary-toolbar"><input id="bestiarySearch" type="search" placeholder="Search fish..." value="${bestiarySearch.replaceAll('"','&quot;')}"><div class="toolbar-right"><select id="bestiarySort"><option value="default" ${bestiarySort==='default'?'selected':''}>Sort: Default</option><option value="name" ${bestiarySort==='name'?'selected':''}>Sort: Name</option><option value="rarity" ${bestiarySort==='rarity'?'selected':''}>Sort: Rarity</option><option value="value" ${bestiarySort==='value'?'selected':''}>Sort: Value</option></select><span class="view-pill">▦</span><span class="view-pill">≣</span></div></div><div class="bestiary-grid">${cards || `<div class="bestiary-empty">No catches match that search.</div>`}</div><div class="bestiary-footer"><strong>${progress.pct.toFixed(0)}% Completed</strong><span>${visibleEntries.length} shown</span></div></section></div>`;
