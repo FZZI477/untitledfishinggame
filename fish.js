@@ -687,6 +687,13 @@ Object.assign(fishDescriptions,{
   "Pilgrim Medal": "A Secret catch used for Mr. Pilgrim's quests. Not bait.",
   "Turkey Medal": "A Secret catch used for Mr. Pilgrim's quests. Not bait."
 });
+// All five variant turkeys accept any equipped bait; the original Turkey prefers FishGiving baits.
+for(const f of FISHGIVING_FISH){
+  if(["Lucky Turkey","Funny Turkey","Stinky Turkey","Cool Turkey","Big Turkey"].includes(f[0])){
+    f[5].preferredBait=["Any Bait"];
+    fishDescriptions[f[0]]=fishDescriptions[f[0]].replace("any FishGiving bait","any bait");
+  }
+}
 locations.harvestfalls={
   name:"Harvest Falls",
   desc:"🍁 FishGiving's limited autumn waterfall. Fishing conditions are locked to Autumn, independently of the global season. Returns November 13–December 1.",
