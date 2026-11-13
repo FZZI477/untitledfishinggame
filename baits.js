@@ -131,7 +131,7 @@ window.createBaits = function(api) {
     list.innerHTML='<div class="bait-row"><div><strong>No bait</strong><div class="small">Fish without consuming bait.</div></div><button class="pixel-button small-btn" onclick="equipBait(\'\')" '+(!name?'disabled':'')+'>'+(!name?'Equipped':'Unequip')+'</button></div>'+
       BAIT_TYPES.filter(b=>b.name!=="Suspicious Bait" || (s.baits[b.name]||0)>0).map(b=>{
         const qty=s.baits[b.name]||0,active=name===b.name;
-        return `<div class="bait-row ${active?"bait-selected":""}"><div class="bait-info">${b.limited?`<img src="assets/fishgiving/sprites.svg#${b.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")}" alt="">`:""}<strong>${b.name}</strong><div class="small">${b.description}</div><div class="small">${b.limited?"🍁 Limited · Harvest Crate (1/3 per roll)":"Bait Box roll: 5%"} · Owned: ${qty}</div></div><button class="pixel-button small-btn" ${!qty||active?"disabled":""} onclick="equipBait('${b.name}')">${active?"Equipped":"Equip"}</button></div>`;
+        return `<div class="bait-row ${active?"bait-selected":""}"><div class="bait-info">${b.limited?`<img src="assets/fishgiving/sprites.svg?v=2#${b.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")}" alt="">`:""}<strong>${b.name}</strong><div class="small">${b.description}</div><div class="small">${b.limited?"🍁 Limited · Harvest Crate (1/3 per roll)":"Bait Box roll: 5%"} · Owned: ${qty}</div></div><button class="pixel-button small-btn" ${!qty||active?"disabled":""} onclick="equipBait('${b.name}')">${active?"Equipped":"Equip"}</button></div>`;
       }).join("");
   }
   migrateOldQuestBait();
