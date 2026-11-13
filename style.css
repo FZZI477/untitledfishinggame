@@ -407,3 +407,14 @@ body[data-weather="drought"] .scene-backdrop {
 #equippedBaitSummary {margin-top:7px;}
 #baitModal .bag-modal {max-height:90vh;overflow-y:auto;}
 @media(max-width:520px) {.bait-row {flex-direction:column;align-items:stretch;} .bait-row button {align-self:flex-start;}}
+
+/* FishGiving Harvest Falls / direct Locations menu */
+.destination-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding-top:12px}
+.destination-card{background:rgba(7,19,31,.6);border:2px solid rgba(177,223,249,.2);border-radius:16px;padding:15px;display:grid;gap:10px}
+.destination-head{display:flex;justify-content:space-between;align-items:center;gap:9px}
+.destination-current{border-color:#83d6a4;background:rgba(20,66,46,.4)}
+.destination-card button{justify-self:start}
+#harvestCrateOffer:not([hidden]){display:block;margin:16px 0;border-color:#df9a4c;background:linear-gradient(120deg,rgba(90,52,22,.7),rgba(45,28,21,.7))}
+body[data-location="harvestfalls"] .location-hero{background:linear-gradient(120deg,rgba(33,20,15,.8),rgba(83,47,16,.28)),radial-gradient(ellipse at 70% 20%,rgba(234,151,42,.45),transparent 60%),linear-gradient(180deg,#87481a,#2a2219)!important;border-color:#d8a353}
+body[data-location="harvestfalls"] .hero-kicker{color:#ffd18b}
+.bait-row .bait-info img{image-rendering:pixelated;width:48px;height:48px;object-fit:contain;float:left;margin-right:10px}
