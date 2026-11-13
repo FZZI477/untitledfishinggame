@@ -55,7 +55,7 @@
           <div id="bagEquippedPassive" class="small"></div>
           <div class="footer-actions">
             <button id="openRodBagBtn2" class="pixel-button">Equip Rod</button>
-            <button id="switchLocationBtn" class="pixel-button">Travel</button>
+            <button id="switchLocationBtn" class="pixel-button">🗺️ Locations</button>
           </div>
           <div class="footer-actions">
             <button id="openBaitBtn" class="pixel-button">🪱 Equip Bait</button>
@@ -93,6 +93,10 @@
       </div>
     </section>
 
+    <section id="screen-locations" class="screen-view"><div class="page-frame pixel-panel">
+      <div class="section-head"><div><div class="pixel-kicker">DESTINATIONS</div><h3>🗺️ Locations</h3><p class="small">Select any unlocked location directly. Limited locations open during their annual events.</p></div></div>
+      <div id="locationsList" class="destination-grid"></div>
+    </div></section>
     <section id="screen-rods" class="screen-view"><div class="page-frame pixel-panel"><div id="rods"></div></div></section>
     <section id="screen-bestiary" class="screen-view"><div class="page-frame pixel-panel bestiary-frame"><div id="bestiary"></div></div></section>
     <section id="screen-inventory" class="screen-view"><div class="page-frame pixel-panel"><div id="inventory"></div></div></section>
@@ -122,6 +126,9 @@
               <button id="buyBaitBoxBtn" class="pixel-button primary">Buy $100</button>
             </div>
             <div id="baitTotalCount" class="small">Baits owned: 0</div>
+          </div>
+          <div id="harvestCrateOffer" class="rod-card large-card" hidden>
+          <div class="rod-head"><div><strong>🍁 Harvest Bait Crate · LIMITED</strong><div class="small">FishGiving · November 13 – December 1. Receive 10 random FishGiving baits: Cranberries, Pumpkin Pie Slice, or Cornbread (equal chance per roll).</div></div><button id="buyHarvestCrateBtn" class="pixel-button primary">Buy 1,000 Gold</button></div>
           </div>
           <button id="useSunMaskBtn" class="pixel-button primary">Use Sunstone</button>
         </div>
@@ -168,6 +175,7 @@
       <div class="section-head compact"><div><div class="pixel-kicker">MENU BAR</div><h3>Launchpad</h3></div><button id="closeLaunchpadBtn" class="pixel-button small-btn">Close</button></div>
       <div class="launch-grid">
         <button class="launch-app" data-screen="fishing"><span class="launch-icon">🎣</span><span>Fishing</span></button>
+        <button class="launch-app" data-screen="locations"><span class="launch-icon">🗺️</span><span>Locations</span></button>
         <button class="launch-app" data-screen="rods"><span class="launch-icon">🪝</span><span>Rods</span></button>
         <button class="launch-app" data-screen="bestiary"><span class="launch-icon">📖</span><span>Bestiary</span></button>
         <button class="launch-app" data-screen="inventory"><span class="launch-icon">🎒</span><span>Inventory</span></button>
