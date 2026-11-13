@@ -1,7 +1,7 @@
 // Gameplay, UI rendering, and controls
 
 let state = loadState();
-    if(!locations[state.location]) state.location="gravitas";
+    if(!locations[state.location] || (state.location==="harvestfalls"&&!isFishGivingActive())) state.location="gravitas";
     if(!rods.some(r=>r.id===state.equipped)) state.equipped="twig";
     // SunSlasher equipment now persists.
     state.currentWeather=state.weather||state.currentWeather||"Clear";
@@ -12,7 +12,7 @@ let state = loadState();
     let bestiarySort = "default";
     let activeScreen = state.activeScreen || "fishing";
     const SEASONS = ["Spring","Summer","Autumn","Winter"];
-    const SECRET_NAMES = new Set(["Cosmic Pearl","The Sun Idol","The Moon Idol"]);
+    const SECRET_NAMES = new Set(["Cosmic Pearl","The Sun Idol","The Moon Idol","Pilgrim Medal","Turkey Medal"]);
     const TIKI_TOTEM_PRICE = 1000;
     state.favoriteFish = Array.isArray(state.favoriteFish) ? state.favoriteFish : [];
     let pendingBait = null; // Chosen for a cast, consumed only when a fish bites.
@@ -79,6 +79,7 @@ let state = loadState();
       const phase = Math.floor((Date.now() - state.seasonStart) / SEASON_MS);
       return SEASONS[((phase % SEASONS.length) + SEASONS.length) % SEASONS.length];
     }
+    function getLocalFishingSeason() {return state.location==="harvestfalls"?"Autumn":getSeason();}
     function getSeasonRemaining() {
       if ((state.seasonOverrideUntil || 0) > Date.now()) return state.seasonOverrideUntil - Date.now();
       const elapsed = ((Date.now() - state.seasonStart) % SEASON_MS + SEASON_MS) % SEASON_MS;
@@ -201,6 +202,9 @@ let state = loadState();
       else if(bait==="Fish Head"){stats.haste+=20;}
       else if(bait==="Shark Head"){stats.steady+=30;}
       else if(bait==="Skeleton"){stats.luck-=20;}
+      else if(bait==="Cranberries"){stats.luck+=15;stats.steady-=5;stats.haste+=30;}
+      else if(bait==="Pumpkin Pie Slice"){stats.luck+=70;stats.steady+=5;stats.haste-=20;}
+      else if(bait==="Cornbread"){stats.luck+=5;stats.steady+=30;stats.haste+=5;}
       return stats;
     }
 
@@ -246,6 +250,7 @@ let state = loadState();
 
     function isLocationUnlocked(id) {
       if (id === "gravitas") return true;
+      if (id === "harvestfalls") return isFishGivingActive();
       if (id === "aurora") return locationCompletion("gravitas").pct >= 50;
       if (id === "shark") return locationCompletion("aurora").pct >= 50;
       if (id === "grandreef") return locationCompletion("shark").pct >= 50;
@@ -293,7 +298,7 @@ let state = loadState();
     };
 
     function getSpecificFishSprite(name) {
-      return `assets/fish/${slugify(name)}.png`;
+      return FISHGIVING_NAMES.has(name)?`assets/fishgiving/sprites.svg#${slugify(name)}`:`assets/fish/${slugify(name)}.png`;
     }
 
     function getFishSprite(name, rarity, item = false, condition = "") {
@@ -357,7 +362,7 @@ let state = loadState();
         hero.classList.toggle("reef", state.location === "grandreef");
         hero.classList.toggle("rainbow", state.location === "rainbow");
       }
-      document.body.dataset.season = slugify(getSeason());
+      document.body.dataset.season = slugify(getLocalFishingSeason());
     }
 
     function setScreen(screen) {
@@ -375,7 +380,7 @@ let state = loadState();
       const weatherName = currentWeatherName();
       const waitSeconds = Math.max(0, (100 - stats.haste) * .075);
       const sceneKicker = document.getElementById('sceneKicker');
-      if (sceneKicker) sceneKicker.textContent = `${locations[state.location].name} • ${getSeason()} • ${getPeriod() === 'day' ? 'Day' : 'Night'} • ${weatherName}`;
+      if (sceneKicker) sceneKicker.textContent = `${locations[state.location].name} • ${getLocalFishingSeason()}${state.location==="harvestfalls"?" (Locked)":""} • ${getPeriod() === 'day' ? 'Day' : 'Night'} • ${weatherName}`;
       const castEta = document.getElementById('castEtaLabel');
       if (castEta) castEta.textContent = waitSeconds <= 0 ? 'Lure ETA: instant bite' : `Lure ETA: ${waitSeconds.toFixed(2)}s`;
       const bagName = document.getElementById('bagEquippedName');
@@ -457,6 +462,7 @@ let state = loadState();
     }
 
     function render() {
+      if(state.location==="harvestfalls"&&!isFishGivingActive())state.location="gravitas";
       const period = getPeriod();
       document.getElementById("money").textContent = formatMoney(state.money);
       document.getElementById("equippedTop").textContent = currentRod().name;
@@ -483,13 +489,8 @@ let state = loadState();
       document.getElementById("areaProgress").style.width = `${comp.pct}%`;
       document.getElementById("areaCompletionText").textContent = `${comp.caught}/${comp.total} required species discovered (${comp.pct.toFixed(0)}%)`;
 
-      const switchBtn = document.getElementById("switchLocationBtn");
-      const unlocked=locationOrder.filter(isLocationUnlocked);
-      const idx=unlocked.indexOf(state.location);
-      const nextId=unlocked[(idx+1)%unlocked.length];
-      switchBtn.dataset.next=nextId;
-      switchBtn.textContent=unlocked.length>1?`Travel to ${locations[nextId].name}`:"More locations locked";
-      switchBtn.disabled=unlocked.length<=1;
+      const switchBtn=document.getElementById("switchLocationBtn");
+      if(switchBtn){switchBtn.textContent="🗺️ Locations";switchBtn.disabled=false;}
       document.getElementById("sunMaskCount").textContent = `Owned: ${state.sunMasks || 0}`;
       document.getElementById("useSunMaskBtn").disabled = !(state.sunMasks > 0);
       const tikiCount=document.getElementById("tikiTotemCount");
@@ -507,6 +508,7 @@ let state = loadState();
       renderInventory();
       renderRodBag();
       baits.render();
+      renderLocations();
       renderCodeEffects();
       renderLog();
       updateClock();
@@ -564,7 +566,8 @@ let state = loadState();
         { id:"loc:aurora", label:"Aurora Pond", location:"aurora" },
         { id:"loc:shark", label:"Shark Shores", location:"shark" },
         { id:"loc:grandreef", label:"The Grand Reef", location:"grandreef" },
-        { id:"loc:rainbow", label:"Rainbow Pond", location:"rainbow" }
+        { id:"loc:rainbow", label:"Rainbow Pond", location:"rainbow" },
+        { id:"loc:harvestfalls", label:"🍁 Harvest Falls · Limited", location:"harvestfalls" }
       ];
       const eventFilters = [
         { id:"event:sharkMigration", label:"Shark Migration", entries:locations.shark.fish.filter(f=>isSharkFish(f[0])||f[4]==="migration"||f[4]==="migrationRequired") },
@@ -630,6 +633,10 @@ let state = loadState();
         if(meta.weather) parts.push(meta.weather+" weather");
         if(meta.optional) parts.push("Optional");
         if(meta.adventure) parts.push("Adventure");
+        if(meta.limited)parts.push("🍁 Limited");
+        if(meta.preferredBait?.length)parts.push("Prefers "+meta.preferredBait.join(" / "));
+        if(meta.dateOnly)parts.push("November 26 only");
+        if(condition==="turkeyReplacement")parts.push("10% Turkey replacement");
         if(parts.length) conditionText=parts.join(" · ");
         return `<article class="bestiary-list-card ${caught?"caught":"uncaught"}"><div class="bestiary-thumb ${(!caught&&secret)?'locked':''}"><img src="${thumb}" alt="${displayName}"></div><div class="bestiary-copy"><div class="bestiary-card-top"><div><strong>${displayName}</strong></div><span class="badge ${rarity}">${rarity}</span></div><p>${desc}</p><div class="bestiary-meta"><span>${caught?`Caught: ${count}`:"Undiscovered"}</span><span>${caught||!secret?`Value: ${price}g`:"Value ???"}</span>${conditionText?`<span>${conditionText}</span>`:""}${item?`<span>Item Catch</span>`:""}</div></div></article>`;
       }).join("");
@@ -701,7 +708,10 @@ let state = loadState();
       const rod=currentRod(), period=getPeriod(), weather=currentWeatherName(), meta=fishMeta(f), c=f[4];
       if (isSecretFish(f) && !allowSecret) return false;
       if (meta.period && meta.period !== period) return false;
-      if (meta.seasons?.length && !meta.seasons.includes(getSeason())) return false;
+      if(meta.limited && (state.location!=="harvestfalls"||!isFishGivingActive()))return false;
+      if(meta.dateOnly){const d=new Date();if(d.getMonth()+1!==meta.dateOnly.month||d.getDate()!==meta.dateOnly.day)return false;}
+      if(c==="turkeyReplacement")return false;
+      if (meta.seasons?.length && !meta.seasons.includes(getLocalFishingSeason())) return false;
       if (meta.weather && meta.weather !== weather) return false;
       if(c==="day"||c==="dayOptional") return period==="day";
       if(c==="night") return period==="night";
@@ -716,7 +726,8 @@ let state = loadState();
     function getAvailablePool() {
       const rod=currentRod(), weather=currentWeatherName();
       let source;
-      if(weather==="Tsunami") source=allFishPool();
+      if(state.location==="harvestfalls") source=locations.harvestfalls.fish;
+      else if(weather==="Tsunami") source=allFishPool();
       else if(weather==="Flood") source=eventBestiaries.flood;
       else if(weather==="Acid Rain") source=eventBestiaries.acid;
       else if(weather==="Drought") source=eventBestiaries.drought;
@@ -724,6 +735,7 @@ let state = loadState();
       else source=locations[state.location].fish;
 
       let pool=source.filter(f=>fishConditionMet(f,false));
+      if(state.location!=="harvestfalls")pool=pool.filter(f=>!fishMeta(f).limited);
       if(rod.id==="electromagnetic") pool=pool.filter(f=>f[3]===true);
       pool=pool.filter(f=>baitAllowsFish(f));
       return pool;
@@ -759,7 +771,8 @@ let state = loadState();
         "Mosslurker": {name:"Lunar Lurker",location:"aurora",enabled:state.location==="aurora"&&getPeriod()==="night"},
         "Blue Whale": {name:"Moby",location:"shark",enabled:state.location==="shark"},
         "Reef Titan": {name:"Grand Reef Titan",location:"grandreef",enabled:state.location==="grandreef"},
-        "Kelpie": {name:"Elder Kelpie",event:"flood",enabled:currentWeatherName()==="Flood"}
+        "Kelpie": {name:"Elder Kelpie",event:"flood",enabled:currentWeatherName()==="Flood"},
+        "Turkey": {name:"The Turkey",location:"harvestfalls",enabled:state.location==="harvestfalls"&&isFishGivingActive()}
       };
       const replacement=replacements[selected.f[0]];
       if(replacement?.enabled && rod.id!=="electromagnetic"){
@@ -1124,6 +1137,8 @@ let state = loadState();
       // Bait mutation checks take priority over natural/rod/weather mutations.
       if(baitEffect==="Vitamins"){mutation="Nutritious Mutation";multiplier=1.75;}
       else if(baitEffect==="Brine" && Math.random()<.25){mutation="Dissolved Mutation";multiplier=1;}
+      else if(baitEffect==="Cranberries" && Math.random()<.10){mutation="Sour Mutation";multiplier=2;}
+      else if(baitEffect==="Pumpkin Pie Slice" && Math.random()<.20){mutation="Harvest Mutation";multiplier=2.1;}
 
       if (rod.id === "fortuneous" && Math.random() < .10) extraCopies++;
       if (rod.id === "sunslasher" && (state.sunslasherLevel||1)>=4 && Math.random()<.15)extraCopies++;
@@ -1140,6 +1155,7 @@ let state = loadState();
       if(rod.id==="moon16")weightFactor=getPeriod()==="night"?1.2:.5;
       if(rod.id==="melody16")weightFactor=1.15;
       if(baitEffect==="Egg")weightFactor*=1.1;
+      if(baitEffect==="Cornbread")weightFactor*=1.33;
       addInventory(name, basePrice, mutation, multiplier * weatherValue, 1, weightFactor);
       if (extraCopies) {
         if (extraMutation) {
@@ -1301,7 +1317,25 @@ let state = loadState();
       render();
     }
 
-    function switchLocation(){
+    function renderLocations(){
+      const el=document.getElementById("locationsList");if(!el)return;
+      el.innerHTML=Object.entries(locations).map(([id,loc])=>{
+        const active=id===state.location,limited=!!loc.limited,available=isLocationUnlocked(id),c=locationCompletion(id);
+        return `<article class="destination-card ${active?"destination-current":""}">
+        <div class="destination-head"><strong>${limited?"🍁 ":""}${loc.name}</strong><span class="small">${active?"CURRENT":limited?"LIMITED":"PERMANENT"}</span></div>
+        <div class="small">${loc.desc}</div><div class="small">${c.caught}/${c.total} required catches ${limited?"· Nov 13 – Dec 1":""}</div>
+        <button class="pixel-button ${active?"":"primary"}" onclick="travelToLocation('${id}')" ${!available||active?"disabled":""}>${active?"Here":available?"Travel Here":limited?"Event Closed":"Locked"}</button>
+        </article>`;
+      }).join("");
+    }
+    function travelToLocation(id){
+      if(!locations[id]||!isLocationUnlocked(id)||activeMini||pendingBait||hookedBait)return;
+      state.location=id;
+      addLog("Travelled to "+locations[id].name+".","success");
+      activeScreen="fishing";render();
+    }
+    window.travelToLocation=travelToLocation;
+    function switchLocation(){setScreen("locations");return;
       const unlocked=["gravitas"];
       if(isAuroraUnlocked())unlocked.push("aurora");
       if(isLocationUnlocked("shark"))unlocked.push("shark");
@@ -1451,6 +1485,7 @@ let state = loadState();
 
     document.getElementById("fishButton").addEventListener("click", castLine);
     document.getElementById("buyBaitBoxBtn").addEventListener("click",()=>baits.buyBox());
+    document.getElementById("buyHarvestCrateBtn").addEventListener("click",()=>baits.buyHarvestCrate());
     document.getElementById("openBaitBtn").addEventListener("click",()=>{
       baits.render();document.getElementById("baitModal").classList.add("active");
     });
