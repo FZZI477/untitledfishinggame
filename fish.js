@@ -278,3 +278,418 @@ locations.rainbow = {
   ]
 };
 
+
+/* FishGiving: separate local season; limited catches remain in save files after the event. */
+function isFishGivingActive(date=new Date()) {
+  const m=date.getMonth()+1,d=date.getDate();
+  return (m===11 && d>=13) || (m===12 && d===1);
+}
+const FISHGIVING_FISH=[
+  [
+    "Fishcake",
+    "Common",
+    20,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Herbfish",
+    "Common",
+    10,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cranberries"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Zestfish",
+    "Common",
+    30,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Pumpkin Pie Slice"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Fish Oil",
+    "Uncommon",
+    25,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Secret Recipe",
+    "Uncommon",
+    50,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Massive Leaf",
+    "Uncommon",
+    50,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Turkey Feather",
+    "Uncommon",
+    1,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Pumpkin Piefish",
+    "Rare",
+    100,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Pumpkin Pie Slice"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Windwalker",
+    "Rare",
+    125,
+    false,
+    "",
+    {
+      "weather": "Windy",
+      "limited": true
+    }
+  ],
+  [
+    "Farmerfish",
+    "Rare",
+    111,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Harvest Eel",
+    "Rare",
+    150,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cranberries"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Pilgrim Hat",
+    "Mythical",
+    300,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Salem Salamander",
+    "Mythical",
+    500,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Corn Cob",
+    "Mythical",
+    400,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Squashfish",
+    "Mythical",
+    700,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Pumpkin Pie Slice"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Cornucopia Handle",
+    "Legendary",
+    1000,
+    true,
+    "",
+    {
+      "weather": "Rainbow",
+      "limited": true
+    }
+  ],
+  [
+    "Harvest Totem",
+    "Legendary",
+    1,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Falling Totem",
+    "Legendary",
+    1,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Balance Totem",
+    "Legendary",
+    1,
+    true,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Pumpkin Pie",
+    "Legendary",
+    2000,
+    false,
+    "",
+    {
+      "limited": true
+    }
+  ],
+  [
+    "Turkey",
+    "Unknown",
+    2300,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cranberries",
+        "Pumpkin Pie Slice",
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Lucky Turkey",
+    "Unknown",
+    2500,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cranberries",
+        "Pumpkin Pie Slice",
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Funny Turkey",
+    "Unknown",
+    2500,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cranberries",
+        "Pumpkin Pie Slice",
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Stinky Turkey",
+    "Unknown",
+    2500,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cranberries",
+        "Pumpkin Pie Slice",
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Cool Turkey",
+    "Unknown",
+    2500,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cranberries",
+        "Pumpkin Pie Slice",
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "Big Turkey",
+    "Unknown",
+    2500,
+    false,
+    "",
+    {
+      "preferredBait": [
+        "Cranberries",
+        "Pumpkin Pie Slice",
+        "Cornbread"
+      ],
+      "limited": true
+    }
+  ],
+  [
+    "The Turkey",
+    "Extinct",
+    5000,
+    false,
+    "turkeyReplacement",
+    {
+      "optional": true,
+      "replaces": "Turkey",
+      "limited": true
+    }
+  ],
+  [
+    "Stuffed Turkey",
+    "Extinct",
+    10000,
+    false,
+    "",
+    {
+      "dateOnly": {
+        "month": 11,
+        "day": 26
+      },
+      "limited": true
+    }
+  ],
+  [
+    "Pilgrim Medal",
+    "Secret",
+    1,
+    true,
+    "secret",
+    {
+      "secret": true,
+      "optional": true,
+      "questItem": true,
+      "limited": true
+    }
+  ],
+  [
+    "Turkey Medal",
+    "Secret",
+    1,
+    true,
+    "secret",
+    {
+      "secret": true,
+      "optional": true,
+      "questItem": true,
+      "limited": true
+    }
+  ]
+];
+const FISHGIVING_NAMES=new Set(FISHGIVING_FISH.map(f=>f[0]));
+Object.assign(fishDescriptions,{
+  "Fishcake": "A sweet harvest pastry fish. Prefers Cornbread.",
+  "Herbfish": "A fragrant fish with leafy scales. Prefers Cranberries.",
+  "Zestfish": "An orange-bright harvest fish. Prefers Pumpkin Pie Slice.",
+  "Fish Oil": "A bottle of golden fish oil.",
+  "Secret Recipe": "An ancient Thanksgiving recipe scroll.",
+  "Massive Leaf": "An enormous maple leaf.",
+  "Turkey Feather": "A feather drifting with the autumn current.",
+  "Pumpkin Piefish": "A pie-topped fish. Prefers Pumpkin Pie Slice.",
+  "Windwalker": "A breezy fish that appears only during Windy Weather.",
+  "Farmerfish": "A hard-working field fish. Prefers Cornbread.",
+  "Harvest Eel": "A winding autumn eel. Prefers Cranberries.",
+  "Pilgrim Hat": "A pilgrim hat caught in the current.",
+  "Salem Salamander": "A fall-colored mythical salamander. Prefers Cornbread.",
+  "Corn Cob": "A golden ear of corn.",
+  "Squashfish": "A squash-shaped fish. Prefers Pumpkin Pie Slice.",
+  "Cornucopia Handle": "A magical horn handle found only during Rainbow Weather.",
+  "Harvest Totem": "A totem carved with harvest leaves.",
+  "Falling Totem": "A totem surrounded by falling leaves.",
+  "Balance Totem": "A seasonal balance totem.",
+  "Pumpkin Pie": "A full, freshly baked pumpkin pie.",
+  "Turkey": "The original Unknown turkey. Prefers any FishGiving bait.",
+  "Lucky Turkey": "A lucky clover-bearing turkey. Prefers any FishGiving bait.",
+  "Funny Turkey": "A comical turkey. Prefers any FishGiving bait.",
+  "Stinky Turkey": "A turkey with a memorable smell. Prefers any FishGiving bait.",
+  "Cool Turkey": "A stylish turkey. Prefers any FishGiving bait.",
+  "Big Turkey": "A huge turkey. Prefers any FishGiving bait.",
+  "The Turkey": "An Extinct legend that replaces a Turkey encounter 10% of the time.",
+  "Stuffed Turkey": "A special Extinct feast catch available only on November 26.",
+  "Pilgrim Medal": "A Secret catch used for Mr. Pilgrim's quests. Not bait.",
+  "Turkey Medal": "A Secret catch used for Mr. Pilgrim's quests. Not bait."
+});
+locations.harvestfalls={
+  name:"Harvest Falls",
+  desc:"🍁 FishGiving's limited autumn waterfall. Fishing conditions are locked to Autumn, independently of the global season. Returns November 13–December 1.",
+  limited:true,
+  fish:FISHGIVING_FISH
+};
