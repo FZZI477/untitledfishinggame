@@ -23,6 +23,13 @@ const BAIT_TYPES = [
   {name:"Skeleton", description:"-20 Luck."},
   {name:"Coal", description:"No effect... yet."}
 ];
+const STANDARD_BAIT_COUNT=BAIT_TYPES.length;
+const FISHGIVING_BAIT_TYPES=[
+  {name:"Cranberries",description:"+15 Luck, -5 Steadiness, +30 Haste. 10% Sour Mutation (2×).",limited:true},
+  {name:"Pumpkin Pie Slice",description:"+70 Luck, +5 Steadiness, -20 Haste. 20% Harvest Mutation (2.1×).",limited:true},
+  {name:"Cornbread",description:"+5 Luck, +30 Steadiness, +5 Haste, +33% weight.",limited:true}
+];
+BAIT_TYPES.push(...FISHGIVING_BAIT_TYPES);
 window.createBaits = function(api) {
   const names = new Set(BAIT_TYPES.map(b => b.name));
   function sync() {
@@ -56,7 +63,7 @@ window.createBaits = function(api) {
   function prepare() {
     const name=selected();
     if(!name)return null;
-    const candidates=BAIT_TYPES.filter(x=>x.name!=="Suspicious Bait");
+    const candidates=BAIT_TYPES.slice(0,STANDARD_BAIT_COUNT).filter(x=>x.name!=="Suspicious Bait");
     const effect=name==="Suspicious Bait"?candidates[Math.floor(Math.random()*candidates.length)].name:name;
     return {name,effect};
   }
@@ -80,7 +87,7 @@ window.createBaits = function(api) {
   function openBox(source="Bait Box"){
     const rolled=[];
     for(let i=0;i<5;i++){
-      const name=BAIT_TYPES[Math.floor(Math.random()*BAIT_TYPES.length)].name;
+      const name=BAIT_TYPES[Math.floor(Math.random()*STANDARD_BAIT_COUNT)].name;
       add(name,1);rolled.push(name);
     }
     api.log(`${source} opened: ${rolled.join(", ")}.`,"success");
@@ -93,7 +100,24 @@ window.createBaits = function(api) {
     openBox("Purchased Bait Box");
     api.render();
   }
+  function buyHarvestCrate(){
+    const s=sync();
+    if(!isFishGivingActive()){api.log("Harvest Bait Crates are available Nov 13–Dec 1 only.","warning");return;}
+    if(s.money<1000){api.log("Not enough Gold for a Harvest Bait Crate.","warning");return;}
+    s.money-=1000;
+    const rolled=[];
+    for(let i=0;i<10;i++){
+      const name=FISHGIVING_BAIT_TYPES[Math.floor(Math.random()*FISHGIVING_BAIT_TYPES.length)].name;
+      add(name,1);rolled.push(name);
+    }
+    api.log("Harvest Bait Crate opened: "+rolled.join(", ")+".","success");
+    api.render();
+  }
   function render() {
+    const offer=document.getElementById("harvestCrateOffer");
+    if(offer)offer.hidden=!isFishGivingActive();
+    const harvestBuy=document.getElementById("buyHarvestCrateBtn");
+    if(harvestBuy)harvestBuy.disabled=!isFishGivingActive()||api.state().money<1000;
     const s=sync(),name=selected();
     const summary=document.getElementById("equippedBaitSummary");
     if(summary)summary.textContent=name?`Equipped: ${name} · ${s.baits[name]} remaining · 1 used per hook`:"Equipped: None · Buy or catch Bait Boxes for 5 random baits";
@@ -107,9 +131,9 @@ window.createBaits = function(api) {
     list.innerHTML='<div class="bait-row"><div><strong>No bait</strong><div class="small">Fish without consuming bait.</div></div><button class="pixel-button small-btn" onclick="equipBait(\'\')" '+(!name?'disabled':'')+'>'+(!name?'Equipped':'Unequip')+'</button></div>'+
       BAIT_TYPES.filter(b=>b.name!=="Suspicious Bait" || (s.baits[b.name]||0)>0).map(b=>{
         const qty=s.baits[b.name]||0,active=name===b.name;
-        return `<div class="bait-row ${active?"bait-selected":""}"><div class="bait-info"><strong>${b.name}</strong><div class="small">${b.description}</div><div class="small">Box roll: 5% · Owned: ${qty}</div></div><button class="pixel-button small-btn" ${!qty||active?"disabled":""} onclick="equipBait('${b.name}')">${active?"Equipped":"Equip"}</button></div>`;
+        return `<div class="bait-row ${active?"bait-selected":""}"><div class="bait-info">${b.limited?`<img src="assets/fishgiving/sprites.svg#${b.name.toLowerCase().replace(/[^a-z0-9]+/g,"-")}" alt="">`:""}<strong>${b.name}</strong><div class="small">${b.description}</div><div class="small">${b.limited?"🍁 Limited · Harvest Crate (1/3 per roll)":"Bait Box roll: 5%"} · Owned: ${qty}</div></div><button class="pixel-button small-btn" ${!qty||active?"disabled":""} onclick="equipBait('${b.name}')">${active?"Equipped":"Equip"}</button></div>`;
       }).join("");
   }
   migrateOldQuestBait();
-  return {add,selected,prepare,consume,equip,openBox,buyBox,render,definitions:BAIT_TYPES};
+  return {add,selected,prepare,consume,equip,openBox,buyBox,buyHarvestCrate,render,definitions:BAIT_TYPES};
 };
