@@ -623,7 +623,7 @@ let state = loadState();
         const caught=count>0;
         const secret=["Unknown","Extinct"].includes(rarity);
         const displayName=!caught&&secret?"???":name;
-        const desc=!caught&&secret?"Its identity remains hidden until you catch it.":(fishDescriptions[name]||"No description recorded.");
+        const desc=!caught&&secret?"Its identity remains hidden until you catch it.":`${fishMeta(f).limited?"🍁 LIMITED · ":""}${fishDescriptions[name]||"No description recorded."}`;
         const thumb = getFishSprite(name, rarity, item, condition);
         let conditionText="";
         if(condition==="day")conditionText="Day only"; if(condition==="night")conditionText="Night only"; if(condition==="dayOptional")conditionText="Day only · Optional"; if(condition==="lunar")conditionText="10% Mosslurker replacement"; if(condition==="optional")conditionText="Optional"; if(condition==="whale")conditionText="Whale Migration"; if(condition==="moby")conditionText="10% Blue Whale replacement"; if(condition==="migration")conditionText="Shark Migration"; if(condition==="migrationRequired")conditionText="Shark Migration · Required"; if(condition==="coral")conditionText="Hides in Coral"; if(condition==="reefTitan")conditionText="10% Reef Titan replacement"; if(condition==="required")conditionText="Required"; if(condition==="elderKelpie")conditionText="10% Kelpie replacement";
