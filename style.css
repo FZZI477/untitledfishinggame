@@ -430,3 +430,18 @@ body[data-location="harvestfalls"] .hero-kicker{color:#ffd18b}
 .bait-row .bait-info img{image-rendering:pixelated;filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}
 @media(max-width:1100px){.bestiary-list-card{grid-template-columns:150px minmax(0,1fr)}}
 @media(max-width:700px){.bestiary-list-card{grid-template-columns:1fr}}
+
+/* All 20 original bait sprites: transparent icons with no baked-in backgrounds. */
+.bait-row .bait-info{display:flex;align-items:center;flex-wrap:wrap;column-gap:10px}
+.bait-row .bait-info .bait-sprite{
+  display:block;float:none;flex:0 0 54px;
+  width:54px;height:54px;margin:0;object-fit:contain;
+  image-rendering:pixelated;
+  filter:drop-shadow(0 3px 2px rgba(0,0,0,.24));
+}
+.bait-row .bait-info strong{flex:1 1 calc(100% - 66px);min-width:80px}
+.bait-row .bait-info .small{flex:0 0 100%;margin-left:64px}
+@media(max-width:520px){
+  .bait-row .bait-info .bait-sprite{flex-basis:48px;width:48px;height:48px}
+  .bait-row .bait-info .small{margin-left:58px}
+}
